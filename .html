@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Координатная плоскость</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: sans-serif;
+    background: #f5f5f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  h1 { color: #333; }
+
+  .controls {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  input {
+    width: 80px;
+    padding: 8px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+  }
+  input:focus { border-color: #e91e63; }
+  button {
+    padding: 8px 20px;
+    font-size: 16px;
+    background: #e91e63;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  button:hover { background: #c2185b; }
+  canvas {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+
+  /* ─── Окно "Упс" ─── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 100;
+  }
+  .overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    background: white;
+    padding: 30px 40px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    transform: scale(0.85);
+    transition: transform 0.25s ease;
+  }
+  .overlay.show .modal { transform: scale(1); }
+  .modal .emoji {
+    font-size: 40px;
+    line-height: 1;
+    margin-bottom: 10px;
+  }
+  .modal h2 {
+    margin: 0 0 10px;
+    color: #e91e63;
+  }
+  .modal p {
+    margin: 0 0 20px;
+    color: #555;
+    font-size: 17px;
+  }
+
+  /* ─── Полноэкранное сердечко ─── */
+  #fullHeart {
+    position: fixed;
+    inset: 0;
+    background: #e91e63;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 200;
+  }
+  #fullHeart.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #fullHeart svg {
+    width: 90vmin;
+    height: 90vmin;
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.06); }
+  }
+
+  /* ─── Финальный экран ─── */
+  #finalScreen {
+    position: fixed;
+    inset: 0;
+    background: #f5f5f7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+    z-index: 150;
+    text-align: center;
+    padding: 20px;
+  }
+  #finalScreen.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #finalScreen h1 {
+    font-size: clamp(24px, 5vw, 48px);
+    color: #e91e63;
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+</style>
+</head>
+<body>
+
+  <h1>Введи координаты</h1>
+
+  <div class="controls">
+    <label>X: <input id="x" type="number" value="0" step="1"></label>
+    <label>Y: <input id="y" type="number" value="0" step="1"></label>
+    <button onclick="show()">Показать</button>
+  </div>
+
+  <canvas id="cv" width="800" height="700"></canvas>
+
+  <!-- Окно "Упс" -->
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <div class="emoji">💔</div>
+      <h2>Упс!</h2>
+      <p>Попробуй ещё раз</p>
+      <button onclick="closeModal()">Ещё раз</button>
+    </div>
+  </div>
+
+  <!-- Полноэкранное сердечко -->
+  <div id="fullHeart">
+    <svg viewBox="-1 -1 2 2" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,0.35
+               C0,0.1 -0.5,-0.1 -0.5,-0.4
+               C-0.5,-0.75 -0.05,-0.75 0,-0.45
+               C0.05,-0.75 0.5,-0.75 0.5,-0.4
+               C0.5,-0.1 0,0.1 0,0.35 Z"
+            fill="#ffffff"/>
+    </svg>
+  </div>
+
+  <!-- Финальный экран -->
+  <div id="finalScreen">
+    <h1>Здравствуйте, вот вам ник: Солнышко ❤️</h1>
+  </div>
+
+<script>
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  const X_MIN = -1, X_MAX = 25;
+  const Y_MIN = -1, Y_MAX = 25;
+
+  const padLeft = 60, padRight = 50, padTop = 40, padBottom = 40;
+
+  const scaleX = (W - padLeft - padRight) / (X_MAX - X_MIN);
+  const scaleY = (H - padTop - padBottom)   / (Y_MAX - Y_MIN);
+
+  const originX = padLeft + (0 - X_MIN) * scaleX;
+  const originY = H - padBottom - (0 - Y_MIN) * scaleY;
+
+  function toPx(x, y) {
+    return { px: originX + x * scaleX, py: originY - y * scaleY };
+  }
+  function fmt(n) { return String(n); }
+
+  function drawHeart(px, py, size, color) {
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.scale(size, size);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, 0.35);
+    ctx.bezierCurveTo( 0.0,  0.1, -0.5, -0.1, -0.5, -0.4);
+    ctx.bezierCurveTo(-0.5, -0.75, -0.05,-0.75,  0.0, -0.45);
+    ctx.bezierCurveTo( 0.05,-0.75,  0.5, -0.75,  0.5, -0.4);
+    ctx.bezierCurveTo( 0.5, -0.1,   0.0,  0.1,  0.0,  0.35);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawAxes(alpha = 1) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalAlpha = alpha;
+
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, originY); ctx.lineTo(W - padRight, originY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(originX, padTop); ctx.lineTo(originX, H - padBottom);
+    ctx.stroke();
+
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.moveTo(W - padRight, originY);
+    ctx.lineTo(W - padRight - 12, originY - 6);
+    ctx.lineTo(W - padRight - 12, originY + 6);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(originX, padTop);
+    ctx.lineTo(originX - 6, padTop + 12);
+    ctx.lineTo(originX + 6, padTop + 12);
+    ctx.fill();
+
+    ctx.font = 'bold 16px sans-serif';
+    ctx.fillText('x', W - padRight - 5, originY - 10);
+    ctx.fillText('y', originX + 10, padTop + 14);
+    ctx.fillText('0', originX + 6, originY + 18);
+
+    ctx.font = '12px sans-serif';
+    ctx.textAlign = 'center';
+    for (let x = Math.ceil(X_MIN); x <= X_MAX; x += 2) {
+      if (x === 0) continue;
+      const { px } = toPx(x, 0);
+      ctx.fillText(fmt(x), px, originY + 16);
+    }
+    ctx.textAlign = 'right';
+    for (let y = Math.ceil(Y_MIN); y <= Y_MAX; y += 2) {
+      if (y === 0) continue;
+      const { py } = toPx(0, y);
+      ctx.fillText(fmt(y), originX - 6, py + 4);
+    }
+    ctx.textAlign = 'left';
+    ctx.globalAlpha = 1;
+  }
+
+  let animId = null;
+
+  function animateHeart(x, y, onDone) {
+    const target = toPx(x, y);
+    const START = 6;
+    const END = Math.max(W, H) * 1.2; // чтобы точно закрыть canvas
+
+    const t0 = performance.now();
+    const DURATION = 1500;
+
+    if (animId) cancelAnimationFrame(animId);
+
+    function frame(t) {
+      const k = Math.min((t - t0) / DURATION, 1);
+      // ускорение (easeInCubic)
+      const ease = k * k * k;
+      const size = START + (END - START) * ease;
+
+      drawAxes(1 - k);           // оси плавно растворяются
+      drawHeart(target.px, target.py, size, '#e91e63');
+
+      if (k < 1) {
+        animId = requestAnimationFrame(frame);
+      } else if (onDone) {
+        onDone();
+      }
+    }
+    animId = requestAnimationFrame(frame);
+  }
+
+  // ─── Сценарии ───
+
+  function showCorrect() {
+    // 1) растить сердечко в canvas
+    animateHeart(12, 13, () => {
+      // 2) показать полноэкранное сердечко
+      document.getElementById('fullHeart').classList.add('show');
+      // 3) через паузу — растворить и показать финальный экран
+      setTimeout(() => {
+        document.getElementById('fullHeart').classList.remove('show');
+        setTimeout(() => {
+          document.getElementById('finalScreen').classList.add('show');
+        }, 400);
+      }, 1200);
+    });
+  }
+
+  function showWrong(x, y) {
+    drawAxes(1);
+    // маленькое сердечко в указанной точке
+    const t = toPx(x, y);
+    drawHeart(t.px, t.py, 8, '#e91e63');
+    ctx.fillStyle = '#e91e63';
+    ctx.font = 'bold 15px sans-serif';
+    ctx.fillText(`(${fmt(x)}. ${fmt(y)})`, t.px + 16, t.py - 14);
+
+    // окно "Упс"
+    document.getElementById('overlay').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('overlay').classList.remove('show');
+    // вернуть экран к исходному состоянию
+    drawAxes(1);
+    document.getElementById('x').value = 0;
+    document.getElementById('y').value = 0;
+  }
+
+  function show() {
+    const x = parseFloat(document.getElementById('x').value);
+    const y = parseFloat(document.getElementById('y').value);
+
+    if (x === 13 && y === 12) {
+      showCorrect();
+    } else {
+      showWrong(x || 0, y || 0);
+    }
+  }
+
+  // стартовая отрисовка
+  drawAxes(1);
+</script>
+
+</body>
+</html>
