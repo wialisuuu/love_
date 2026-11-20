@@ -4,11 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Ввод кода</title>
-  <!-- Подключаем шрифт Manrope из Figma -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
-  <img src="cat.jpg" alt="Кот" class="cat-image">
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
   
   <style>
     * {
@@ -20,10 +18,10 @@
 
     html, body {
       width: 100%;
-      height: 100dvh; /* Точная высота видимого экрана Safari без панелей */
+      height: 100dvh;
       background-color: #5C7C36;
-      overflow: hidden; /* Полный запрет прокрутки */
-      position: fixed; /* Запрет оттягивания экрана пальцем на iPhone */
+      overflow: hidden;
+      position: fixed;
       inset: 0;
       display: flex;
       justify-content: center;
@@ -31,32 +29,57 @@
       font-family: 'Manrope', sans-serif;
     }
 
-    /* Контейнер макета */
+    /* Контейнер на весь экран телефона */
     .screen {
       position: relative;
-      width: 390px;
-      height: 844px;
+      width: 100%;
+      max-width: 402px;
+      height: 100%;
       background-color: #5C7C36;
-      overflow: hidden;
-      flex-shrink: 0;
-      transition: transform 0.25s ease;
-    }
-
-    /* Сдвиг вверх при открытии экранной клавиатуры iPhone */
-    .screen.keyboard-open {
-      margin-top: -140px;
-    }
-
-    /* Ячейки ввода (Input - Number - QWERTY) */
-    .code-input {
-      box-sizing: border-box;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 12px 4px;
-      position: absolute;
+      overflow: hidden;
+      transition: transform 0.25s ease;
+    }
+
+    /* Сдвиг вверх при открытии клавиатуры */
+    .screen.keyboard-open {
+      transform: translateY(-95px);
+    }
+
+    /* Центральный блок: 6 ячеек + кот */
+    .center-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    /* Ряд с 6 ячейками */
+    .inputs-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    /* Обертка для ячейки и нижней полоски */
+    .input-box {
+      position: relative;
+      width: 49px;
       height: 51px;
+    }
+
+    /* Поле ввода (стиль из Figma) */
+    .code-input {
+      width: 100%;
+      height: 100%;
       background: rgba(255, 255, 255, 0.12);
       border: 1px solid #D1D1D6;
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -67,58 +90,43 @@
       font-weight: 600;
       color: #FFFFFF;
       text-align: center;
+      padding-bottom: 6px;
       outline: none;
       caret-color: #FFFFFF;
     }
 
     .code-input:focus {
       border-color: #FFFFFF;
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.22);
     }
 
-    /* Точные координаты ячеек из Figma */
-    .input-1 { width: 49px; left: 20px;  top: 302px; }
-    .input-2 { width: 49px; left: 81px;  top: 302px; }
-    .input-3 { width: 50px; left: 136px; top: 302px; }
-    .input-4 { width: 51px; left: 196px; top: 302px; }
-    .input-5 { width: 49px; left: 258px; top: 302px; }
-    .input-6 { width: 49px; left: 319px; top: 304px; }
-
-    /* Нижние линии внутри ячеек (Line 1 - Line 6) */
-    .line {
+    /* Нижняя линия внутри каждой ячейки */
+    .input-box::after {
+      content: '';
       position: absolute;
-      height: 0px;
-      top: 347px;
-      border-top: 1px solid #A6A6B0;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 34px;
+      height: 1px;
+      background-color: #A6A6B0;
       pointer-events: none;
     }
 
-    .line-1 { width: 34px; left: 29px; }
-    .line-2 { width: 33px; left: 90px; }
-    .line-3 { width: 33px; left: 145px; }
-    .line-4 { width: 35px; left: 204px; }
-    .line-5 { width: 36px; left: 265px; }
-    .line-6 { width: 36px; left: 325px; }
-
-    /* Картинка с котом по центру */
+    /* Картинка с котом */
     .cat-image {
-      position: absolute;
       width: 136px;
       height: 136px;
-      left: 127px;
-      top: 375px;
       object-fit: cover;
-      border-radius: 2px;
+      border-radius: 4px;
       user-select: none;
     }
 
-    /* Знаки вопроса на фоне */
+    /* Знаки вопроса на фоне (в процентах, чтобы работали на любом экране без обрезки) */
     .q-mark {
       position: absolute;
-      width: 9px;
-      height: 21px;
+      z-index: 1;
       font-family: 'Manrope', sans-serif;
-      font-style: normal;
       font-weight: 400;
       font-size: 16px;
       line-height: 20px;
@@ -127,28 +135,27 @@
       pointer-events: none;
     }
 
-    /* Точные координаты и повороты из вашего CSS */
-    .q1  { left: 82px;     top: 484px; }
-    .q2  { left: 350px;    top: 694px;    transform: rotate(25.54deg); }
-    .q3  { left: 177.18px; top: 647.54px; transform: rotate(51.08deg); }
-    .q4  { left: 364px;    top: 36px;     transform: rotate(76.62deg); }
-    .q5  { left: 327px;    top: 805px;    transform: rotate(102.15deg); }
-    .q6  { left: 50px;     top: 801px;    transform: rotate(127.69deg); }
-    .q7  { left: 191px;    top: 829px;    transform: rotate(153.23deg); }
-    .q8  { left: 63px;     top: 88px;     transform: rotate(178.77deg); }
-    .q9  { left: 342px;    top: 594px;    transform: rotate(-155.69deg); }
-    .q10 { left: 43px;     top: 659px;    transform: rotate(-130.15deg); }
-    .q11 { left: 40px;     top: 422px;    transform: rotate(-104.62deg); }
-    .q12 { left: 136px;    top: 748px;    transform: rotate(-79.08deg); }
-    .q13 { left: 195px;    top: 44px;     transform: rotate(-53.54deg); }
-    .q14 { left: 170px;    top: 411px;    transform: rotate(-28deg); }
-    .q15 { left: 318px;    top: 439px;    transform: rotate(1.6deg); }
-    .q16 { left: 173px;    top: 498px;    transform: rotate(1.6deg); }
-    .q17 { left: 68px;     top: 571px;    transform: rotate(1.6deg); }
-    .q18 { left: 236px;    top: 697px;    transform: rotate(1.6deg); }
-    .q19 { left: 356px;    top: 186px;    transform: rotate(1.6deg); }
-    .q20 { left: 280px;    top: 130px;    transform: rotate(15deg); }
-    .q21 { left: 165px;    top: 215px;    transform: rotate(-20deg); }
+    .q1  { left: 21%; top: 57%; }
+    .q2  { left: 89%; top: 82%; transform: rotate(25.54deg); }
+    .q3  { left: 45%; top: 76%; transform: rotate(51.08deg); }
+    .q4  { left: 92%; top: 5%;  transform: rotate(76.62deg); }
+    .q5  { left: 83%; top: 92%; transform: rotate(102.15deg); }
+    .q6  { left: 13%; top: 91%; transform: rotate(127.69deg); }
+    .q7  { left: 49%; top: 94%; transform: rotate(153.23deg); }
+    .q8  { left: 16%; top: 10%; transform: rotate(178.77deg); }
+    .q9  { left: 87%; top: 70%; transform: rotate(-155.69deg); }
+    .q10 { left: 11%; top: 78%; transform: rotate(-130.15deg); }
+    .q11 { left: 10%; top: 50%; transform: rotate(-104.62deg); }
+    .q12 { left: 35%; top: 88%; transform: rotate(-79.08deg); }
+    .q13 { left: 50%; top: 6%;  transform: rotate(-53.54deg); }
+    .q14 { left: 43%; top: 48%; transform: rotate(-28deg); }
+    .q15 { left: 81%; top: 52%; transform: rotate(1.6deg); }
+    .q16 { left: 44%; top: 59%; transform: rotate(1.6deg); }
+    .q17 { left: 17%; top: 67%; transform: rotate(1.6deg); }
+    .q18 { left: 60%; top: 82%; transform: rotate(1.6deg); }
+    .q19 { left: 90%; top: 22%; transform: rotate(1.6deg); }
+    .q20 { left: 72%; top: 15%; transform: rotate(15deg); }
+    .q21 { left: 28%; top: 25%; transform: rotate(-20deg); }
   </style>
 </head>
 <body>
@@ -177,42 +184,27 @@
     <span class="q-mark q20">?</span>
     <span class="q-mark q21">?</span>
 
-    <!-- 6 полей для ввода -->
-    <input type="text" maxlength="1" class="code-input input-1" autocomplete="off">
-    <input type="text" maxlength="1" class="code-input input-2" autocomplete="off">
-    <input type="text" maxlength="1" class="code-input input-3" autocomplete="off">
-    <input type="text" maxlength="1" class="code-input input-4" autocomplete="off">
-    <input type="text" maxlength="1" class="code-input input-5" autocomplete="off">
-    <input type="text" maxlength="1" class="code-input input-6" autocomplete="off">
+    <!-- Центральный блок с полями и котом -->
+    <div class="center-content">
+      <div class="inputs-row">
+        <div class="input-box"><input type="text" maxlength="1" class="code-input" autocomplete="off"></div>
+        <div class="input-box"><input type="text" maxlength="1" class="code-input" autocomplete="off"></div>
+        <div class="input-box"><input type="text" maxlength="1" class="code-input" autocomplete="off"></div>
+        <div class="input-box"><input type="text" maxlength="1" class="code-input" autocomplete="off"></div>
+        <div class="input-box"><input type="text" maxlength="1" class="code-input" autocomplete="off"></div>
+        <div class="input-box"><input type="text" maxlength="1" class="code-input" autocomplete="off"></div>
+      </div>
 
-    <!-- Линии внутри полей -->
-    <div class="line line-1"></div>
-    <div class="line line-2"></div>
-    <div class="line line-3"></div>
-    <div class="line line-4"></div>
-    <div class="line line-5"></div>
-    <div class="line line-6"></div>
-
-    <!-- Картинка с котом -->
-    <img src="cat.jpg" alt="Кот" class="cat-image">
+      <img src="cat.jpg" alt="Кот" class="cat-image">
+    </div>
   </div>
 
   <script>
     const screen = document.getElementById('screen');
     const inputs = document.querySelectorAll('.code-input');
 
-    // Масштабирование строго под видимый экран iPhone 17 без прокрутки
-    function scaleToFit() {
-      const scaleX = window.innerWidth / 390;
-      const scaleY = window.innerHeight / 844;
-      const scale = Math.min(scaleX, scaleY);
-      screen.style.transform = `scale(${scale})`;
-    }
-    window.addEventListener('resize', scaleToFit);
-    scaleToFit();
-
-    // Поднимаем экран при фокусе на ячейку, чтобы клавиатура не закрывала кота
     inputs.forEach((input, index) => {
+      // Подъем при открытии клавиатуры
       input.addEventListener('focus', () => {
         screen.classList.add('keyboard-open');
       });
@@ -225,28 +217,20 @@
         }, 100);
       });
 
+      // Переход к следующей ячейке
       input.addEventListener('input', (e) => {
         if (e.target.value.length === 1 && index < inputs.length - 1) {
           inputs[index + 1].focus();
         }
-        checkCode();
       });
 
+      // Возврат при удалении
       input.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
           inputs[index - 1].focus();
         }
       });
     });
-
-    // Функция проверки введенного кода
-    function checkCode() {
-      const enteredCode = Array.from(inputs).map(i => i.value).join('');
-      if (enteredCode.length === 6) {
-        console.log('Введен код:', enteredCode);
-        // Здесь можно добавить действие при правильном коде
-      }
-    }
   </script>
 </body>
 </html>
