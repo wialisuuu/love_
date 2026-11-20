@@ -238,15 +238,16 @@
     });
 
     // Проверка введенных 6 цифр
-    function checkCode() {
+      function checkCode() {
       const enteredCode = Array.from(inputs).map(i => i.value).join('');
       
       if (enteredCode.length === 6) {
+        inputs[5].blur(); // Прячем клавиатуру на iPhone перед переходом
         setTimeout(() => {
           if (enteredCode === '368921') {
-            window.location.href = "error.html"; 
+            window.location.href = "index_1.html"; 
           } else {
-            window.location.href = "index_1.html";
+            window.location.href = "error.html";
           }
         }, 200);
       }
