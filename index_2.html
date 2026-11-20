@@ -125,15 +125,19 @@
   <script>
     const nextBtn = document.getElementById('nextBtn');
 
-    nextBtn.addEventListener('click', () => {
-      // Запускаем увеличение плашки на весь экран
-      nextBtn.classList.add('expand');
+    // Запускаем увеличение автоматически сразу после загрузки страницы
+    window.addEventListener('DOMContentLoaded', () => {
+      // Небольшая пауза в 50 мс нужна, чтобы браузер успел отрисовать начальный размер и плавно запустил анимацию
+      setTimeout(() => {
+        nextBtn.classList.add('expand');
+      }, 50);
 
-      // Ждем 550 мс, пока плашка заполнит экран, и переходим на index_3.html
+      // Через 2 секунды (2000 мс) автоматически переходим на index_3.html
       setTimeout(() => {
         window.location.href = 'index_3.html';
       }, 2000);
     });
   </script>
+
 </body>
 </html>
