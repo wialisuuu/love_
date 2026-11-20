@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Ввод кода</title>
   <!-- Подключаем шрифт Manrope из Figma -->
-  <link rel="preconnect" href="https://googleapis.com">
-  <link rel="preconnect" href="https://gstatic.com" crossorigin>
-  <link href="https://googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
   <img src="cat.jpg" alt="Кот" class="cat-image">
   
   <style>
@@ -18,25 +18,33 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    body {
-      background-color: #5C7C36; /* Зеленый фон со скриншота */
+    html, body {
+      width: 100%;
+      height: 100dvh; /* Точная высота видимого экрана Safari без панелей */
+      background-color: #5C7C36;
+      overflow: hidden; /* Полный запрет прокрутки */
+      position: fixed; /* Запрет оттягивания экрана пальцем на iPhone */
+      inset: 0;
       display: flex;
       justify-content: center;
-      min-height: 100vh;
-      overflow-x: hidden;
+      align-items: center;
       font-family: 'Manrope', sans-serif;
     }
 
-    /* Контейнер под размер экрана iPhone (390x844) */
+    /* Контейнер макета */
     .screen {
-      position: fixed;
-      overflow: hidden;
-      position: fixed; 
-      width: 390x;
+      position: relative;
+      width: 390px;
       height: 844px;
       background-color: #5C7C36;
       overflow: hidden;
-      transform-origin: top center;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+
+    /* Сдвиг вверх при открытии экранной клавиатуры iPhone */
+    .screen.keyboard-open {
+      margin-top: -140px;
     }
 
     /* Ячейки ввода (Input - Number - QWERTY) */
@@ -54,7 +62,6 @@
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
       border-radius: 8px;
       
-      /* Стиль текста внутри ячейки */
       font-family: 'Manrope', sans-serif;
       font-size: 22px;
       font-weight: 600;
@@ -140,7 +147,6 @@
     .q17 { left: 68px;     top: 571px;    transform: rotate(1.6deg); }
     .q18 { left: 236px;    top: 697px;    transform: rotate(1.6deg); }
     .q19 { left: 356px;    top: 186px;    transform: rotate(1.6deg); }
-    /* Дополнительные верхние знаки со скриншота */
     .q20 { left: 280px;    top: 130px;    transform: rotate(15deg); }
     .q21 { left: 165px;    top: 215px;    transform: rotate(-20deg); }
   </style>
@@ -187,24 +193,38 @@
     <div class="line line-5"></div>
     <div class="line line-6"></div>
 
-    <!-- Картинка с котом (положите файл cat.jpg рядом с index.html) -->
+    <!-- Картинка с котом -->
     <img src="cat.jpg" alt="Кот" class="cat-image">
   </div>
 
   <script>
-    // Масштабирование экрана под любую модель iPhone
+    const screen = document.getElementById('screen');
+    const inputs = document.querySelectorAll('.code-input');
+
+    // Масштабирование строго под видимый экран iPhone 17 без прокрутки
     function scaleToFit() {
-      const screen = document.getElementById('screen');
-      const scale = window.innerWidth / 390;
+      const scaleX = window.innerWidth / 390;
+      const scaleY = window.innerHeight / 844;
+      const scale = Math.min(scaleX, scaleY);
       screen.style.transform = `scale(${scale})`;
     }
     window.addEventListener('resize', scaleToFit);
     scaleToFit();
 
-    // Логика автоматического перехода между ячейками при вводе
-    const inputs = document.querySelectorAll('.code-input');
-
+    // Поднимаем экран при фокусе на ячейку, чтобы клавиатура не закрывала кота
     inputs.forEach((input, index) => {
+      input.addEventListener('focus', () => {
+        screen.classList.add('keyboard-open');
+      });
+
+      input.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (!document.activeElement.classList.contains('code-input')) {
+            screen.classList.remove('keyboard-open');
+          }
+        }, 100);
+      });
+
       input.addEventListener('input', (e) => {
         if (e.target.value.length === 1 && index < inputs.length - 1) {
           inputs[index + 1].focus();
@@ -224,8 +244,7 @@
       const enteredCode = Array.from(inputs).map(i => i.value).join('');
       if (enteredCode.length === 6) {
         console.log('Введен код:', enteredCode);
-        // Здесь можно добавить проверку пароля, например:
-        // if (enteredCode.toUpperCase() === '123456') { alert('Верно!'); }
+        // Здесь можно добавить действие при правильном коде
       }
     }
   </script>
