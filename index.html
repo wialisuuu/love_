@@ -237,6 +237,10 @@
       });
     });
 
+    window.addEventListener('pageshow', () => {
+      inputs.forEach(input => input.value = '');
+    });
+    
     // Проверка введенных 6 цифр
       function checkCode() {
       const enteredCode = Array.from(inputs).map(i => i.value).join('');
