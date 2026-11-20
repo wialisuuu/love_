@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Maths</title>
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      background-color: #416320;
+      overflow: hidden;
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    /* Контейнер на весь экран обычного iPhone 17 (maths) */
+    .screen {
+      position: relative;
+      width: 100%;
+      max-width: 402px;
+      height: 100%;
+      background: rgba(65, 99, 32, 0.92);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 76px 24px 32px;
+      overflow: hidden;
+      transition: transform 0.25s ease;
+    }
+
+    /* Сдвиг вверх при открытии клавиатуры */
+    .screen.keyboard-open {
+      transform: translateY(-75px);
+    }
+
+    /* Белая карточка с картинкой уравнения */
+    .equation-card {
+      width: 100%;
+      max-width: 318px;
+      min-height: 112px;
+      background-color: #FFFFFF;
+      border-radius: 36px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+    }
+
+    .equation-image {
+      max-width: 100%;
+      max-height: 84px;
+      object-fit: contain;
+      user-select: none;
+    }
+
+    /* Блок ввода X= и Y= */
+    .inputs-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 44px;
+      width: 100%;
+    }
+
+    .var-field {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .var-label {
+      font-family: 'Manrope', sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: #D5E2C8;
+      user-select: none;
+    }
+
+    /* Ячейка ввода в стиле первого экрана */
+    .input-box {
+      position: relative;
+      width: 49px;
+      height: 51px;
+    }
+
+    .code-input {
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid #D1D1D6;
+      box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+      border-radius: 8px;
+
+      font-family: 'Manrope', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #FFFFFF;
+      text-align: center;
+      padding-bottom: 6px;
+      outline: none;
+      caret-color: #FFFFFF;
+    }
+
+    .code-input:focus {
+      border-color: #FFFFFF;
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    /* Нижняя линия внутри каждой ячейки */
+    .input-box::after {
+      content: '';
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 34px;
+      height: 1px;
+      background-color: #A6A6B0;
+      pointer-events: none;
+    }
+
+    /* Координатная плоскость 30 на 30 */
+    .plane-container {
+      width: 266px;
+      height: 266px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .plane-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .axis-label {
+      font-family: 'Manrope', sans-serif;
+      font-size: 10px;
+      fill: #D5E8C3;
+      user-select: none;
+    }
+
+    /* Кот внизу экрана */
+    .cat-image {
+      width: 116px;
+      height: auto;
+      object-fit: contain;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen" id="screen">
+    <!-- Верхняя белая плашка с картинкой уравнения -->
+    <div class="equation-card">
+      <img src="equation.png" alt="уравнение" class="equation-image">
+    </div> <!-- Поля ввода X и Y -->
+    <div class="inputs-group">
+      <div class="var-field">
+        <span class="var-label">X=</span>
+        <div class="input-box">
+          <input type="text" inputmode="numeric" maxlength="3" id="inputX" class="code-input" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="var-field">
+        <span class="var-label">Y=</span>
+        <div class="input-box">
+          <input type="text" inputmode="numeric" maxlength="3" id="inputY" class="code-input" autocomplete="off">
+        </div>
+      </div>
+    </div>
+
+    <!-- Координатная плоскость 30 на 30 -->
+    <div class="plane-container">
+      <svg class="plane-svg" id="coordPlane" viewBox="0 0 266 266" fill="none" xmlns="http://w3.org">
+        <!-- Сюда JS отрисует сетку 30x30 -->
+        <g id="gridGroup"></g>
+
+        <!-- Вертикальная ось Y (0..30) -->
+        <line x1="20" y1="246" x2="20" y2="14" stroke="#D5E8C3" stroke-width="2" stroke-linecap="round"/>
+        <polyline points="14,22 20,13 26,22" stroke="#D5E8C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        
+        <!-- Горизонтальная ось X (0..30) -->
+        <line x1="20" y1="246" x2="252" y2="246" stroke="#D5E8C3" stroke-width="2" stroke-linecap="round"/>
+        <polyline points="244,240 253,246 244,252" stroke="#D5E8C3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+        <!-- Подписи осей -->
+        <text x="10" y="256" class="axis-label">0</text>
+        <text x="246" y="260" class="axis-label">30</text>
+        <text x="3" y="24" class="axis-label">30</text>
+
+        <!-- Точка введенных координат (X, Y) -->
+        <circle id="pointDot" cx="20" cy="246" r="4.5" fill="#FFFFFF" stroke="#2D4615" stroke-width="1.5" style="display: none;"/>
+      </svg>
+    </div>
+
+    <!-- Кот с сердечком внизу -->
+    <img src="heart-cat.png" alt="Кот" class="cat-image">
+  </div>
+
+  <script>
+    const screen = document.getElementById('screen');
+    const inputX = document.getElementById('inputX');
+    const inputY = document.getElementById('inputY');
+    const gridGroup = document.getElementById('gridGroup');
+    const pointDot = document.getElementById('pointDot');
+    const inputs = [inputX, inputY];
+
+    // Параметры сетки 30 на 30 (шаг 7px * 30 = 210px)
+    const ORIGIN_X = 20;
+    const ORIGIN_Y = 246;
+    const STEP = 7;
+    const GRID_SIZE = 30;
+
+    // Отрисовка сетки 30x30
+    for (let i = 1; i <= GRID_SIZE; i++) {
+      const offset = i * STEP;
+      const isMajor = i % 5 === 0;
+      const strokeColor = isMajor ? 'rgba(213, 232, 195, 0.35)' : 'rgba(213, 232, 195, 0.14)';
+
+      // Вертикальная линия сетки
+      const vLine = document.createElementNS('http://w3.org', 'line');
+      vLine.setAttribute('x1', ORIGIN_X + offset);
+      vLine.setAttribute('y1', ORIGIN_Y);
+      vLine.setAttribute('x2', ORIGIN_X + offset);
+      vLine.setAttribute('y2', ORIGIN_Y - GRID_SIZE * STEP);
+      vLine.setAttribute('stroke', strokeColor);
+      vLine.setAttribute('stroke-width', '1');
+      gridGroup.appendChild(vLine);
+
+      // Горизонтальная линия сетки
+      const hLine = document.createElementNS('http://w3.org', 'line');
+      hLine.setAttribute('x1', ORIGIN_X);
+      hLine.setAttribute('y1', ORIGIN_Y - offset);
+      hLine.setAttribute('x2', ORIGIN_X + GRID_SIZE * STEP);
+      hLine.setAttribute('y2', ORIGIN_Y - offset);
+      hLine.setAttribute('stroke', strokeColor);
+      hLine.setAttribute('stroke-width', '1');
+      gridGroup.appendChild(hLine);
+    }
+
+    let checkTimer = null;
+
+    inputs.forEach((input) => {
+      input.addEventListener('focus', () => {
+        screen.classList.add('keyboard-open');
+      });
+
+      input.addEventListener('blur', () => {
+        setTimeout(() => {
+          if (!document.activeElement.classList.contains('code-input')) {
+            screen.classList.remove('keyboard-open');
+          }
+        }, 100);
+      });
+
+      input.addEventListener('input', () => {
+        input.value = input.value.replace(/[^0-9-]/g, '');
+        updatePoint();
+        scheduleCheck();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          clearTimeout(checkTimer);
+          validateAnswer();
+        }
+      });
+    });
+
+    // Отображение точки (x, y) на плоскости 30x30
+    function updatePoint() {
+      const x = parseFloat(inputX.value);
+      const y = parseFloat(inputY.value);
+
+      if (!isNaN(x) && !isNaN(y) && x >= 0 && x <= 30 && y >= 0 && y <= 30) {
+        pointDot.setAttribute('cx', ORIGIN_X + x * STEP);
+        pointDot.setAttribute('cy', ORIGIN_Y - y * STEP);
+        pointDot.style.display = 'block';
+      } else {
+        pointDot.style.display = 'none';
+      }
+    }
+
+        // Очищаем поля при возврате назад со страницы ошибки (важно для Safari на iPhone)
+    window.addEventListener('pageshow', () => {
+      inputX.value = '';
+      inputY.value = '';
+    });
+
+    // Проверка после завершения ввода обоих чисел
+    function scheduleCheck() {
+      clearTimeout(checkTimer);
+      const valX = inputX.value.trim();
+      const valY = inputY.value.trim();
+
+      if (valX !== '' && valY !== '' && valX !== '-' && valY !== '-') {
+        checkTimer = setTimeout(validateAnswer, 900);
+      }
+    }
+
+    function validateAnswer() {
+      const valX = inputX.value.trim();
+      const valY = inputY.value.trim();
+
+      // Исправлена ошибка: добавлены знаки ||
+      if (valX === '' || valY === '' || valX === '-' || valY === '-') return;
+
+      const numX = Number(valX);
+      const numY = Number(valY);
+
+      if (numX === 13 && numY === 12) {
+        window.location.href = 'index_html';
+      } else {
+        window.location.href = 'index_1.html';
+      }
+    }
+
+  </script>
+</body>
+</html>
