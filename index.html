@@ -240,7 +240,7 @@
     window.addEventListener('pageshow', () => {
       inputs.forEach(input => input.value = '');
     });
-    
+
     // Проверка введенных 6 цифр
       function checkCode() {
       const enteredCode = Array.from(inputs).map(i => i.value).join('');
@@ -249,9 +249,9 @@
         inputs[5].blur(); // Прячем клавиатуру на iPhone перед переходом
         setTimeout(() => {
           if (enteredCode === '368921') {
-            window.location.href = "index_1.html"; 
+            window.location.href = "index_2.html"; 
           } else {
-            window.location.href = "error.html";
+            window.location.href = "index_1.html";
           }
         }, 200);
       }

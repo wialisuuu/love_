@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AWESOME!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      background-color: #5C7C36;
+      overflow: hidden;
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    /* Контейнер на весь экран обычного iPhone 17 */
+    .screen {
+      position: relative;
+      width: 100%;
+      max-width: 402px;
+      height: 100%;
+      background: rgba(79, 122, 37, 0.92);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    /* Центральный блок: плашка AWESOME! + довольный кот */
+    .center-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 0 16px;
+    }
+
+    /* Темно-зелёная плашка с белой обводкой */
+    .message-box {
+      position: relative;
+      z-index: 10;
+      width: 180px;
+      height: 86px;
+      background-color: #466824;
+      border: 1.5px solid #FFFFFF;
+      border-radius: 43px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+    }
+
+    .message-box:active {
+      transform: scale(0.95);
+      background-color: #3D5B1F;
+    }
+
+    /* Состояние увеличения плашки на весь экран */
+    .message-box.expand {
+      transform: scale(15);
+      border-color: transparent;
+      pointer-events: none;
+    }
+
+    .message-text {
+      font-family: 'Manrope', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: #FFFFFF;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+      transition: opacity 0.25s ease;
+    }
+
+    /* Текст плавно исчезает при расширении, чтобы не растягивался пикселями */
+    .message-box.expand .message-text {
+      opacity: 0;
+    }
+
+    /* Картинка с довольным котом */
+    .cat-image {
+      width: 220px;
+      height: 220px;
+      object-fit: cover;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen" id="screen">
+    <div class="center-content">
+      <div class="message-box" id="nextBtn" role="button" tabindex="0">
+        <span class="message-text">AWESOME!</span>
+      </div>
+
+      <img src="happy-cat.jpg" alt="Довольный кот" class="cat-image">
+    </div>
+  </div>
+
+  <script>
+    const nextBtn = document.getElementById('nextBtn');
+
+    nextBtn.addEventListener('click', () => {
+      // Запускаем увеличение плашки на весь экран
+      nextBtn.classList.add('expand');
+
+      // Ждем 550 мс, пока плашка заполнит экран, и переходим на index_3.html
+      setTimeout(() => {
+        window.location.href = 'index_3.html';
+      }, 2000);
+    });
+  </script>
+</body>
+</html>
