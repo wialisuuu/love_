@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>You're awesome!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&family=Manrope:wght@400;600&family=Roboto:wght@400;600&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      background-color: #416320;
+      overflow: hidden;
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Manrope', sans-serif;
+    }
+
+    /* Контейнер на весь экран обычного iPhone 17 */
+    .screen {
+      position: relative;
+      width: 100%;
+      max-width: 402px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ==================== ЭКРАН 1: Кот + оси + растущее сердечко ==================== */
+    .intro-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: #4F7229;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+
+    .intro-stage.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Координатные оси */
+    .axes-svg {
+      position: absolute;
+      left: 71px;
+      bottom: 180px;
+      width: 264px;
+      height: 245px;
+      overflow: visible;
+      z-index: 1;
+    }
+
+    /* Кот Popcat */
+    .popcat-image {
+      position: absolute;
+      width: 240px;
+      height: auto;
+      left: 0;
+      bottom: 110px;
+      object-fit: contain;
+      object-position: left bottom;
+      user-select: none;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Зелёное сердечко (💚): 3 сек ждёт, затем 3 сек растёт на весь экран */
+    .growing-heart {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      left: 173px;
+      bottom: 315px;
+      font-size: 23px;
+      line-height: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      pointer-events: none;
+      z-index: 5;
+      will-change: transform;
+      transform-origin: center center;
+      animation: expandHeart 3s cubic-bezier(0.35, 0, 0.85, 0.4) 3s forwards;
+    }
+
+    @keyframes expandHeart {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(55);
+      }
+    }
+
+    /* ==================== ЭКРАН 2: Поздравление со скроллом ==================== */
+    .text-stage {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(148, 198, 98, 0.92);
+      z-index: 1;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    .text-stage.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Декоративные сердечки вокруг рамки */
+    .bg-heart {
+      position: absolute;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .h-22 { width: 48.1px;  height: 48.1px;  left: 70.7px;   top: 16.26px;  transform: rotate(10.58deg); }
+    .h-23 { width: 75.09px; height: 75.09px; left: 257.91px; top: 23.89px;  transform: rotate(-15.34deg); }
+    .h-21 { width: 25.01px; height: 25.01px; left: 12px;     top: 253px;    transform: rotate(-32.68deg); }
+    .h-25 { width: 21.21px; height: 21.21px; left: 14.61px;  top: 556.04px; transform: rotate(25.45deg); }
+    .h-24 { width: 39.6px;  height: 39.6px;  left: 177px;    top: 768px;    transform: rotate(-17.56deg); }
+    .h-18 { width: 97px;    height: 97px;    left: 25px;     top: 779px; }
+
+    /* Окно с прокручиваемым текстом */
+    .text-frame {
+      position: absolute;
+      width: 318px;
+      height: calc(100% - 210px);
+      max-height: 643px;
+      left: 50%;
+      top: 105px;
+      transform: translateX(-50%);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      background: rgba(250, 242, 221, 0.45);
+      border-radius: 10px;
+      padding: 16px 14px 20px;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .text-frame::-webkit-scrollbar {
+      width: 4px;
+    }
+    .text-frame::-webkit-scrollbar-thumb {
+      background: rgba(65, 99, 32, 0.35);
+      border-radius: 4px;
+    }
+
+    .letter-text {
+      font-family: 'Roboto', sans-serif;
+      font-style: normal;
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 24px;
+      letter-spacing: 0.15px;
+      color: #000000;
+    }
+
+    .letter-text p {
+      margin-bottom: 18px;
+    }
+
+    .letter-text .bold-block {
+      font-weight: 600;
+    }
+
+    /* Кнопка Tap в конце текста */
+    .tap-button-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+      padding-right: 4px;
+    }
+
+    .tap-btn {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      padding: 5px 16px;
+      min-width: 67px;
+      height: 34px;
+      background: rgba(255, 253, 248, 0.7);
+      border: 1px solid #110101;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-weight: 600;
+      font-size: 18px;
+      line-height: 22px;
+      color: #000000;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+
+    .tap-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 253, 248, 0.95);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen" id="screen">
+    <!-- ЭКРАН 1: Кот, оси и сердечко (3 сек пауза + 3 сек рост) -->
+    <div class="intro-stage" id="introStage">
+      <svg class="axes-svg" viewBox="0 0 264 245" fill="none" xmlns="http://w3.org">
+        <line x1="8" y1="239" x2="8" y2="4" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+        <polyline points="2,11 8,3 14,11" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        
+        <line x1="8" y1="239" x2="260" y2="241" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+        <polyline points="253,235 261,241 253,247" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+
+      <!-- Картинка кота Popcat -->
+      <img src="popcat.png" alt="Кот" class="popcat-image">
+
+      <!-- Зелёное сердечко -->
+      <div class="growing-heart">💚</div>
+    </div>
+
+    <!-- ЭКРАН 2: Текст поздравления с прокруткой и кнопкой Tap -->
+    <div class="text-stage" id="textStage">
+      <img src="heart.png" alt="Сердечко" class="bg-heart h-22">
+      <img src="heart.png" alt="Сердечко" class="bg-heart h-23">
+      <img src="heart.png" alt="Сердечко" class="bg-heart h-21">
+      <img src="heart.png" alt="Сердечко" class="bg-heart h-25">
+      <img src="heart.png" alt="Сердечко" class="bg-heart h-24">
+      <img src="heart.png" alt="Сердечко" class="bg-heart h-18">
+
+      <div class="text-frame">
+        <div class="letter-text">
+          <p class="bold-block">You’re awesome! You’re just incredibly cool!</p>
+
+          <p>И ты крутой не только сейчас. В течение этого года ты делал много классного. Давай вспомним:<br>
+          Ты придумал гениальный план — делегировать Ване работу на Марию — и провёл с Танечкой две недели в Таиланде. Там даже спас её от стаи волков.</p>
+
+          <p>Ты переехал в Батуми. Благодаря этому потом встретился с Никитой Войтиком, Костей и Дианой, Гудковым, Цыпой и Андреем. Открыл ИП и получил ВНЖ в Грузии. Ездил с мужиками в путешествие по Грузии. Привёз родителей к себе. До этого привёз маму и устроил ей самый лучший отпуск и день рождения в её жизни, сделал VPN для папы.</p>
+
+          <p>Ты был лучшим психологом для родных и сумел собрать их за столом переговоров. Находил внутреннюю мотивацию для походов в качалку. Трезво мыслил — без травы и алкоголя. Радовал мам цветочками.</p>
+
+          <p>А ещё ты отрастил бороду и усы! Выучил грузинский алфавит! Изучал покупку недвижимости в Батуми! Успокоил Таню бесконечно раз. Продуктивно работал. Сдал на права на мотоцикл!!! Купил свой первый мотоцикл!!! А потом сразу второй. За 3 месяца 2 мотоцикла!…</p>
+
+          <p>Съездил с Ваней на Хакатон. Снял квартиру-отель с бассейном и сауной на крыше. Проходил интервью. И даже ИИ-интервью с сертификатом! Изучил банное искусство. Сделал свой сервер. Много ездил кататься на мотоциклах с ребятами.<br>
+          И всё это — в твои 20 лет.</p>
+
+          <p class="bold-block">Ты легенда. И это только начало.</p>
+        </div>
+
+        <!-- Кнопка перехода на index_5.html -->
+        <div class="tap-button-row">
+          <button type="button" class="tap-btn" id="tapBtn">Tap</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const introStage = document.getElementById('introStage');
+    const textStage = document.getElementById('textStage');
+    const tapBtn = document.getElementById('tapBtn');
+
+    // 3 секунды показ кота + 3 секунды рост сердечка = через 6 секунд открываем текст
+    setTimeout(() => {
+      textStage.classList.add('visible');
+      introStage.classList.add('hidden');
+    }, 6000);
+
+    // Переход на index_5.html по нажатию кнопки Tap
+    tapBtn.addEventListener('click', () => {
+      window.location.href = 'index_5.html';
+    });
+  </script>
+</body>
+</html>
